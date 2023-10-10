@@ -1,14 +1,8 @@
+import { ConversationChain } from "langchain/chains";
 import { OpenAI } from "langchain/llms/openai";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { PromptTemplate } from "langchain/prompts";
-import { LLMChain } from "langchain/chains";
-import { initializeAgentExecutorWithOptions } from "langchain/agents";
+import { BufferMemory } from "langchain/memory";
 import { SerpAPI } from "langchain/tools";
 import { Calculator } from "langchain/tools/calculator";
-import { BufferMemory } from "langchain/memory";
-import { ConversationChain } from "langchain/chains";
-import { PlanAndExecuteAgentExecutor } from "langchain/experimental/plan_and_execute";
-import { exec } from "child_process";
 
 const { OPENAI_API_KEY, SERPAPI_API_KEY } = process.env;
 console.log("OPENAI_API_KEY", OPENAI_API_KEY);
@@ -90,27 +84,46 @@ const tools = [
  *
  * Works with a chat model
  */
-const llm = new ChatOpenAI({
-  temperature: 0,
-  modelName: "gpt-3.5-turbo",
-  verbose: true,
-});
+// const llm = new ChatOpenAI({
+//   temperature: 0,
+//   modelName: "gpt-3.5-turbo",
+//   verbose: true,
+// });
 
-const executor = PlanAndExecuteAgentExecutor.fromLLMAndTools({
-  llm,
-  tools,
-});
+// const executor = PlanAndExecuteAgentExecutor.fromLLMAndTools({
+//   llm,
+//   tools,
+// });
 
-const result = await executor.call({
-  // We don't tell it how to do it, we just tell it what to do
-  input:
-    "Who is the current president of the United States? What is their age to the 2nd power?",
-});
+// const result = await executor.call({
+//   // We don't tell it how to do it, we just tell it what to do
+//   input:
+//     "Who is the current president of the United States? What is their age to the 2nd power?",
+// });
 
-console.log(result);
+// console.log(result);
 
 /**
  *
  * Memory
  *
  */
+const llm = new OpenAI({
+  verbose: true,
+});
+const memory = new BufferMemory();
+const conversationChain = new ConversationChain({ llm, memory });
+
+const input1 = "Hey my favorite athlete is Lebron James";
+const res1 = await conversationChain.call({
+  input: input1,
+});
+
+console.log({ input1, res1 });
+
+const input2 = "Who is my favorite athlete?";
+const res2 = await conversationChain.call({
+  input: input2,
+});
+
+console.log({ input2, res2 });
